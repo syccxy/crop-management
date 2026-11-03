@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>启动成功日志</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 32px 40px; background: #0d1117; color: #e6edf3;
+    font-family: "Cascadia Code", Consolas, "Courier New", monospace; font-size: 12.5px;
+    width: 1060px;
+  }
+  h1 { font-family: "Microsoft YaHei", sans-serif; font-size: 20px; margin: 0 0 4px; }
+  .sub { font-family: "Microsoft YaHei", sans-serif; color: #8b949e; font-size: 13px; margin-bottom: 20px; }
+  .term {
+    background: #0a0d12; border: 1px solid #30363d; border-radius: 8px;
+    padding: 18px 22px; line-height: 1.65; white-space: pre-wrap; word-break: break-all;
+  }
+  .spring { color: #3fb950; font-weight: 700; }
+  .ok { color: #3fb950; font-weight: 700; }
+  .info { color: #e6edf3; }
+  .dim { color: #8b949e; }
+  .hl { color: #58a6ff; }
+  .banner { color: #3fb950; }
+</style>
+</head>
+<body>
+<h1>项目启动成功日志</h1>
+<div class="sub">crop-management &nbsp;|&nbsp; mvnw spring-boot:run &nbsp;|&nbsp; Java 21.0.10 + Spring Boot 3.4.5 + Tomcat 10.1.40 &nbsp;|&nbsp; 2026-11-03</div>
+<div class="term"><span class="banner">  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/</span>
+ <span class="dim">:: Spring Boot ::                (v3.4.5)</span>
+
+<span class="dim">2026-11-03 17:29:09.439</span> <span class="info">[main] INFO  com.agri.AgriApplication - Starting AgriApplication using Java 21.0.10 with PID 69412</span>
+<span class="dim">2026-11-03 17:29:10.219</span> <span class="info">[main] INFO  o.s.b.w.embedded.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)</span>
+<span class="dim">2026-11-03 17:29:10.228</span> <span class="info">[main] INFO  o.apache.catalina.core.StandardService - Starting service [Tomcat]</span>
+<span class="dim">2026-11-03 17:29:10.228</span> <span class="info">[main] INFO  o.apache.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.40]</span>
+<span class="dim">2026-11-03 17:29:10.274</span> <span class="info">[main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 806 ms</span>
+<span class="dim">2026-11-03 17:29:21.647</span> <span class="info">[http-nio-8080-exec-1] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...</span>
+<span class="dim">2026-11-03 17:29:21.767</span> <span class="info">[http-nio-8080-exec-1] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.</span>
+<span class="dim">2026-11-03 17:29:10.734</span> <span class="info">[main] INFO  o.s.b.w.embedded.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'</span>
+<span class="dim">2026-11-03 17:29:10.738</span> <span class="ok">[main] INFO  com.agri.AgriApplication - Started AgriApplication in 1.633 seconds (process running for 1.898)</span>
+<span class="dim">2026-11-03 17:29:10.740</span> <span class="ok">[main] INFO  AgriApplication - ====== 农作物品种信息管理系统启动成功 ======</span>
+
+<span class="hl">── 接口请求日志（SLF4J + Logback，入参 info 日志）──</span>
+<span class="dim">2026-11-03 17:29:21.529</span> <span class="info">[http-nio-8080-exec-1] INFO  com.agri.controller.CropController - 收到分页动态查询请求: pageNum=1, pageSize=2, cropName=null, varietyName=null, cropType=null, plantStatus=null</span>
+<span class="dim">2026-11-03 17:29:21.530</span> <span class="info">[http-nio-8080-exec-1] INFO  com.agri.service.impl.CropServiceImpl - 分页动态查询, pageNum=1, pageSize=2, cropName=null, varietyName=null, cropType=null, plantStatus=null</span>
+<span class="dim">2026-11-03 17:29:21.820</span> <span class="info">[http-nio-8080-exec-1] INFO  com.agri.service.impl.CropServiceImpl - 分页动态查询完成, 总条数=12, 总页数=6, 当前页条数=2</span>
+
+<span class="hl">── MyBatis-Plus 动态 SQL（分页查询，无动态条件时不拼接 where）──</span>
+<span class="dim">==></span>  Preparing: <span class="ok">SELECT COUNT(*) AS total FROM crop WHERE deleted = 0</span>
+<span class="dim">==></span>  Preparing: <span class="ok">SELECT id,crop_name,variety_name,crop_type,suit_area,growth_cycle,yield_level,plant_status,deleted,create_time,update_time FROM crop WHERE deleted=0 ORDER BY update_time DESC LIMIT ?</span>
+<span class="dim">==></span>  Parameters: 2(Long)
+<span class="dim">&lt;==</span>      Total: 2
+
+<span class="hl">── 参数校验失败日志（GlobalExceptionHandler 捕获，WARN 级别）──</span>
+<span class="dim">2026-11-03 17:29:53.310</span> <span class="info">[http-nio-8080-exec-7] WARN  c.agri.exception.GlobalExceptionHandler - 参数校验失败: 生长周期不能小于1天</span>
+<span class="dim">2026-11-03 17:29:53.333</span> <span class="info">[http-nio-8080-exec-8] WARN  c.agri.exception.GlobalExceptionHandler - 参数校验失败: 作物名称不能为空</span>
+<span class="dim">2026-11-03 17:29:53.347</span> <span class="info">[http-nio-8080-exec-9] WARN  c.agri.exception.GlobalExceptionHandler - 参数校验失败: 亩产预估不能为负数</span>
+
+<span class="hl">── 新增请求日志（INSERT 自动填充 create_time / update_time）──</span>
+<span class="dim">2026-11-03 17:29:43.194</span> <span class="info">[http-nio-8080-exec-5] INFO  com.agri.controller.CropController - 收到新增品种请求: CropDTO(cropName=小麦, varietyName=济麦22, cropType=粮食, suitArea=山东、河北, growthCycle=230, yieldLevel=520, plantStatus=1)</span>
+<span class="dim">==></span>  Preparing: <span class="ok">INSERT INTO crop ( crop_name, variety_name, crop_type, suit_area, growth_cycle, yield_level, plant_status, create_time, update_time ) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ? )</span>
+<span class="dim">&lt;==</span>    Updates: 1
+<span class="dim">2026-11-03 17:29:43.204</span> <span class="info">[http-nio-8080-exec-5] INFO  com.agri.service.impl.CropServiceImpl - 新增农作物品种成功, id=13</span></div>
+</body>
+</html>

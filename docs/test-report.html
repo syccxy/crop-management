@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>crop-management 接口测试报告</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #0d1117; --panel: #161b22; --border: #30363d;
+    --fg: #e6edf3; --muted: #8b949e;
+    --green: #3fb950; --red: #f85149; --blue: #58a6ff; --orange: #d29922; --purple: #bc8cff;
+    --mono: "Cascadia Code", Consolas, "Courier New", monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 32px 40px; background: var(--bg); color: var(--fg);
+    font-family: "Microsoft YaHei", "PingFang SC", sans-serif; font-size: 14px;
+    width: 1060px;
+  }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  .sub { color: var(--muted); margin-bottom: 28px; font-size: 13px; }
+  .case {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 8px;
+    margin-bottom: 20px; overflow: hidden;
+  }
+  .case-head {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 16px; border-bottom: 1px solid var(--border);
+    font-family: var(--mono); font-size: 13.5px;
+  }
+  .method {
+    font-weight: 700; padding: 2px 10px; border-radius: 4px; font-size: 12px; color: #fff;
+  }
+  .m-get  { background: var(--green); }
+  .m-post { background: var(--blue); }
+  .m-put  { background: var(--orange); }
+  .m-del  { background: var(--red); }
+  .url { color: var(--fg); }
+  .badge {
+    margin-left: auto; font-size: 12px; padding: 2px 10px; border-radius: 10px;
+    font-family: "Microsoft YaHei", sans-serif;
+  }
+  .ok   { background: rgba(63,185,80,.15); color: var(--green); }
+  .warn { background: rgba(248,81,73,.15); color: var(--red); }
+  .case-title { padding: 8px 16px 0; color: var(--muted); font-size: 12.5px; }
+  .section-label {
+    padding: 8px 16px 2px; color: var(--purple); font-size: 11.5px;
+    text-transform: uppercase; letter-spacing: .5px;
+  }
+  pre {
+    margin: 4px 16px 14px; padding: 12px 14px; background: #0a0d12;
+    border: 1px solid var(--border); border-radius: 6px;
+    font-family: var(--mono); font-size: 12.5px; line-height: 1.6;
+    white-space: pre-wrap; word-break: break-all; color: #a5d6ff;
+  }
+  pre.req { color: #d2a8ff; }
+  .kv { padding: 0 16px 14px; color: var(--muted); font-size: 12.5px; }
+  .kv b { color: var(--fg); font-weight: 600; }
+</style>
+</head>
+<body>
+<h1>农作物品种信息管理系统 — 接口测试报告</h1>
+<div class="sub">项目：crop-management（SpringBoot 3.4.5 + MyBatis-Plus 3.5.9）&nbsp;&nbsp;|&nbsp;&nbsp;Base URL：http://localhost:8080&nbsp;&nbsp;|&nbsp;&nbsp;测试时间：2026-11-03</div>
+
+<!-- 1 新增 -->
+<div class="case">
+  <div class="case-head"><span class="method m-post">POST</span><span class="url">/crop/add</span><span class="badge ok">200 操作成功</span></div>
+  <div class="case-title">① 新增农作物品种（正常场景，@Valid 校验通过）</div>
+  <div class="section-label">Request Body</div>
+  <pre class="req">{
+  "cropName": "小麦", "varietyName": "济麦22", "cropType": "粮食",
+  "suitArea": "山东、河北", "growthCycle": 230, "yieldLevel": 520, "plantStatus": 1
+}</pre>
+  <div class="section-label">Response</div>
+  <pre>{"code":200,"msg":"操作成功","data":13}</pre>
+</div>
+
+<!-- 2 校验失败1 -->
+<div class="case">
+  <div class="case-head"><span class="method m-post">POST</span><span class="url">/crop/add</span><span class="badge warn">400 校验失败</span></div>
+  <div class="case-title">② 校验失败：growthCycle=0（@Min(value=1) 触发，全局异常处理器捕获）</div>
+  <div class="section-label">Request Body</div>
+  <pre class="req">{
+  "cropName": "水稻", "varietyName": "测试品种", "cropType": "粮食",
+  "suitArea": "湖南", "growthCycle": 0, "yieldLevel": 500, "plantStatus": 1
+}</pre>
+  <div class="section-label">Response</div>
+  <pre>{"code":400,"msg":"生长周期不能小于1天","data":null}</pre>
+</div>
+
+<!-- 3 校验失败2 -->
+<div class="case">
+  <div class="case-head"><span class="method m-post">POST</span><span class="url">/crop/add</span><span class="badge warn">400 校验失败</span></div>
+  <div class="case-title">③ 校验失败：cropName 为空（@NotBlank 触发）</div>
+  <div class="section-label">Request Body</div>
+  <pre class="req">{ "cropName": "", "varietyName": "测试品种", "cropType": "粮食", "suitArea": "湖南", "growthCycle": 100, "yieldLevel": 500, "plantStatus": 1 }</pre>
+  <div class="section-label">Response</div>
+  <pre>{"code":400,"msg":"作物名称不能为空","data":null}</pre>
+</div>
+
+<!-- 4 校验失败3 -->
+<div class="case">
+  <div class="case-head"><span class="method m-post">POST</span><span class="url">/crop/add</span><span class="badge warn">400 校验失败</span></div>
+  <div class="case-title">④ 校验失败：yieldLevel=-5（@Min(value=0) 触发，数值范围校验）</div>
+  <div class="section-label">Request Body</div>
+  <pre class="req">{ "cropName": "水稻", "varietyName": "测试品种", "cropType": "粮食", "suitArea": "湖南", "growthCycle": 100, "yieldLevel": -5, "plantStatus": 1 }</pre>
+  <div class="section-label">Response</div>
+  <pre>{"code":400,"msg":"亩产预估不能为负数","data":null}</pre>
+</div>
+
+<!-- 5 id查询 -->
+<div class="case">
+  <div class="case-head"><span class="method m-get">GET</span><span class="url">/crop/13</span><span class="badge ok">200 操作成功</span></div>
+  <div class="case-title">⑤ 根据 id 查询详情（返回 CropVO，屏蔽 deleted 字段，组合 plantStatusDesc）</div>
+  <div class="section-label">Response</div>
+  <pre>{"code":200,"msg":"操作成功","data":{"id":13,"cropName":"小麦","varietyName":"济麦22","cropType":"粮食","suitArea":"山东、河北","growthCycle":230,"yieldLevel":520,"plantStatus":1,"plantStatusDesc":"推广中","createTime":"2026-11-03T17:29:43","updateTime":"2026-11-03T17:29:43"}}</pre>
+</div>
+
+<!-- 6 业务异常 -->
+<div class="case">
+  <div class="case-head"><span class="method m-get">GET</span><span class="url">/crop/999</span><span class="badge warn">400 业务异常</span></div>
+  <div class="case-title">⑥ 异常场景：查询不存在的品种（Service 抛出 BusinessException，全局异常处理器捕获）</div>
+  <div class="section-label">Response</div>
+  <pre>{"code":400,"msg":"品种不存在，id=999","data":null}</pre>
+</div>
+
+<!-- 7 类型异常 -->
+<div class="case">
+  <div class="case-head"><span class="method m-get">GET</span><span class="url">/crop/abc</span><span class="badge warn">400 参数异常</span></div>
+  <div class="case-title">⑦ 异常场景：id 传非数字（MethodArgumentTypeMismatchException 统一捕获）</div>
+  <div class="section-label">Response</div>
+  <pre>{"code":400,"msg":"参数类型不正确：id","data":null}</pre>
+</div>
+
+<!-- 8 修改 -->
+<div class="case">
+  <div class="case-head"><span class="method m-put">PUT</span><span class="url">/crop/update?id=13</span><span class="badge ok">200 操作成功</span></div>
+  <div class="case-title">⑧ 修改农作物品种（接收 CropDTO，updateTime 自动填充更新）</div>
+  <div class="section-label">Request Body</div>
+  <pre class="req">{ "cropName": "小麦", "varietyName": "济麦22号", "cropType": "粮食", "suitArea": "山东、河北、河南", "growthCycle": 235, "yieldLevel": 540, "plantStatus": 0 }</pre>
+  <div class="section-label">Response（修改后回查 /crop/13，plantStatusDesc 变为"已停推"）</div>
+  <pre>{"code":200,"msg":"操作成功","data":{"id":13,"cropName":"小麦","varietyName":"济麦22号","cropType":"粮食","suitArea":"山东、河北、河南","growthCycle":235,"yieldLevel":540,"plantStatus":0,"plantStatusDesc":"已停推","createTime":"2026-11-03T17:29:43","updateTime":"2026-11-03T17:30:15"}}</pre>
+</div>
+
+<!-- 9 删除 -->
+<div class="case">
+  <div class="case-head"><span class="method m-del">DELETE</span><span class="url">/crop/13</span><span class="badge ok">200 逻辑删除</span></div>
+  <div class="case-title">⑨ 删除品种（@TableLogic 逻辑删除：UPDATE deleted=1）</div>
+  <div class="section-label">Response</div>
+  <pre>{"code":200,"msg":"操作成功","data":null}</pre>
+  <div class="section-label">删除后再查 /crop/13（逻辑删除生效，查不到已删数据）</div>
+  <pre>{"code":400,"msg":"品种不存在，id=13","data":null}</pre>
+</div>
+
+<!-- 10 动态查询-无条件 -->
+<div class="case">
+  <div class="case-head"><span class="method m-get">GET</span><span class="url">/crop/list?pageNum=1&amp;pageSize=3</span><span class="badge ok">200 全表分页</span></div>
+  <div class="case-title">⑩ 分页查询：不传任何查询条件（动态 SQL 不拼接 where，全表 12 条）</div>
+  <div class="section-label">Response</div>
+  <pre>{"code":200,"msg":"操作成功","data":{"total":12,"pages":4,"pageNum":1,"pageSize":3,"list":[
+  {"id":1,"cropName":"水稻","varietyName":"隆平206","cropType":"粮食","suitArea":"湖南、湖北、江西","growthCycle":130,"yieldLevel":650,"plantStatus":1,"plantStatusDesc":"推广中","createTime":"2026-11-03T17:27:53","updateTime":"2026-11-03T17:27:53"},
+  {"id":2,"cropName":"水稻","varietyName":"湘早籼45号","cropType":"粮食","suitArea":"湖南","growthCycle":110,"yieldLevel":480,"plantStatus":1,"plantStatusDesc":"推广中","createTime":"2026-11-03T17:27:53","updateTime":"2026-11-03T17:27:53"},
+  {"id":3,"cropName":"玉米","varietyName":"郑单958","cropType":"粮食","suitArea":"黄淮海地区","growthCycle":100,"yieldLevel":700,"plantStatus":1,"plantStatusDesc":"推广中","createTime":"2026-11-03T17:27:53","updateTime":"2026-11-03T17:27:53"}]}}</pre>
+</div>
+
+<!-- 11 动态查询-单条件 -->
+<div class="case">
+  <div class="case-head"><span class="method m-get">GET</span><span class="url">/crop/list?cropName=水稻</span><span class="badge ok">200 动态条件</span></div>
+  <div class="case-title">⑪ 动态查询：仅传 cropName（LIKE 模糊，其余条件不拼接）</div>
+  <div class="section-label">Response</div>
+  <pre>{"code":200,"msg":"操作成功","data":{"total":2,"pages":1,"pageNum":1,"pageSize":5,"list":[
+  {"id":1,"cropName":"水稻","varietyName":"隆平206",...,"plantStatusDesc":"推广中",...},
+  {"id":2,"cropName":"水稻","varietyName":"湘早籼45号",...,"plantStatusDesc":"推广中",...}]}}</pre>
+</div>
+
+<!-- 12 动态查询-多条件 -->
+<div class="case">
+  <div class="case-head"><span class="method m-get">GET</span><span class="url">/crop/list?cropType=蔬菜&amp;plantStatus=1</span><span class="badge ok">200 多条件组合</span></div>
+  <div class="case-title">⑫ 动态查询：多条件组合（cropType 精确匹配 + plantStatus 精确匹配）</div>
+  <div class="section-label">Response</div>
+  <pre>{"code":200,"msg":"操作成功","data":{"total":3,"pages":1,"pageNum":1,"pageSize":5,"list":[
+  {"id":5,"cropName":"白菜","varietyName":"快菜一号","cropType":"蔬菜",...},
+  {"id":6,"cropName":"番茄","varietyName":"粉果番茄","cropType":"蔬菜",...},
+  {"id":12,"cropName":"辣椒","varietyName":"线椒王","cropType":"蔬菜",...}]}}</pre>
+</div>
+
+<!-- 13 动态查询-停推 -->
+<div class="case">
+  <div class="case-head"><span class="method m-get">GET</span><span class="url">/crop/list?plantStatus=0</span><span class="badge ok">200 动态条件</span></div>
+  <div class="case-title">⑬ 动态查询：仅传 plantStatus=0（查询全部停推品种）</div>
+  <div class="section-label">Response</div>
+  <pre>{"code":200,"msg":"操作成功","data":{"total":3,"pages":1,"pageNum":1,"pageSize":5,"list":[
+  {"id":4,"cropName":"玉米","varietyName":"先玉335",...,"plantStatusDesc":"已停推",...},
+  {"id":8,"cropName":"柑橘","varietyName":"沙糖橘",...,"plantStatusDesc":"已停推",...},
+  {"id":11,"cropName":"大豆","varietyName":"中黄13",...,"plantStatusDesc":"已停推",...}]}}</pre>
+</div>
+
+<!-- 14 翻页 -->
+<div class="case">
+  <div class="case-head"><span class="method m-get">GET</span><span class="url">/crop/list?pageNum=2&amp;pageSize=3</span><span class="badge ok">200 第2页</span></div>
+  <div class="case-title">⑭ 分页：第 2 页（PageResult 返回 total / pages / pageNum / pageSize / list）</div>
+  <div class="section-label">Response</div>
+  <pre>{"code":200,"msg":"操作成功","data":{"total":12,"pages":4,"pageNum":2,"pageSize":3,"list":[
+  {"id":4,"cropName":"玉米","varietyName":"先玉335",...},
+  {"id":5,"cropName":"白菜","varietyName":"快菜一号",...},
+  {"id":6,"cropName":"番茄","varietyName":"粉果番茄",...}]}}</pre>
+  <div class="kv">测试结论：<b>16 项场景全部通过</b> — 覆盖正常 CRUD、校验失败（3 例）、业务异常、参数类型异常、逻辑删除、分页、动态单条件 / 多条件 / 无条件查询</div>
+</div>
+
+</body>
+</html>
